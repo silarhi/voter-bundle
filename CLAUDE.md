@@ -21,13 +21,18 @@ src/
 ├── Attribute/           # Grants (method or class, repeatable), ProvidesArgument (class, repeatable)
 ├── DependencyInjection/ # RegisterRulesPass: compiles the rules of the security.voter services into setRules() calls
 ├── Exception/           # ExceptionInterface, InvalidRuleException (build), MissingArgumentException (runtime)
-├── PHPStan/             # GrantsMethodExtension: #[Grants] methods are always used (extension.neon)
+├── PHPStan/             # GrantsMethodExtension: #[Grants] methods are always used (extension.neon);
+│                       #   GrantsMemberUsageProvider: the same for shipmonk/dead-code-detector (shipmonk.neon)
+├── Rector/              # Grants-aware decorators of the dead-code rules; Set/VoterSetList::DEAD_CODE
 ├── Rule/                # Rule (plain data, dumpable), RuleLoader (reflection + validation)
 ├── Voter/               # AbstractRuleVoter: supports*() from the rules, resolveContext(), calls the methods
 └── VoterBundle.php      # Registers RegisterRulesPass
+config/rector/           # dead-code.php: the Rector set (skips the originals, registers the Grants-aware rules)
 extension.neon           # The PHPStan extension, included by phpstan/extension-installer
+shipmonk.neon            # The shipmonk usage provider: applications include it by hand (it needs the detector)
 tests/                   # PHPUnit tests mirroring src/, Functional/ (TestKernel), Fixtures/ (models, voters),
-                         #   PHPStan/Data/ (sources analysed by GrantsMethodExtensionTest, excluded from PHPStan)
+                         #   PHPStan/Data/ (sources analysed by the PHPStan and shipmonk rule tests, excluded from PHPStan),
+                         #   Rector/DeadCodeSet/ (AbstractRectorTestCase, *.php.inc fixtures)
 ```
 
 ## Build & Test Commands
@@ -66,8 +71,20 @@ composer validate --strict && composer normalize --dry-run
 - **Resource tracking.** `ReflectionClassResource` only hashes public and protected methods: the pass adds a
   `FileResource` for the voter and each parent below `AbstractRuleVoter`, so editing a private `#[Grants]` method
   rebuilds the debug container.
-- **Rector's dead-code set deletes `#[Grants]` methods** and drops unused `$subject` parameters: `rector.php` skips
-  `RemoveUnusedPrivateMethodRector` for the fixtures, and the README asks applications for the same skips.
+- **Rector's dead-code set deletes `#[Grants]` methods** and drops unused `$subject` parameters. Rector has no
+  skip-by-attribute hook, so `AbstractGrantsAwareRector` decorates the two rules: it makes the private `#[Grants]`
+  methods protected, runs the original rule (which only looks at private methods), then restores them. Their bodies stay
+  in the class, so the helpers they call are still used. Rector's container registers every rule instance it builds,
+  the injected originals included: `config/rector/dead-code.php` (`VoterSetList::DEAD_CODE`) skips them, which is why
+  applications use the set, not the rules alone. The bundle's own `rector.php` uses the set too.
+- **shipmonk/dead-code-detector has a supported hook**, a `MemberUsageProvider` tagged
+  `shipmonk.deadCode.memberUsageProvider`: no decorator needed. Its class extends the detector's, so `extension.neon`
+  (auto-included) cannot register it: `shipmonk.neon` does, included by hand. The bundle's own analysis shows no dead
+  `#[Grants]` method even without it, because the detector sees `RuleLoader`'s `getMethods()` call: only the rule test,
+  which analyses `tests/PHPStan/Data` alone, proves the provider. `phpstan.neon` includes `shipmonk.neon` and ignores the
+  Rector rule constructors (built by Rector's container) and the `eraseCredentials()` of the user fixture.
+- `config/reference.php` is written by the FrameworkBundle of the test kernel (Symfony 7.4+): it is gitignored and
+  out of PHP CS Fixer, PHPStan and Rector, which only read `config/rector`.
 - `symfony/polyfill-php85` is a dev dependency: PHPStan's `RuleTestCase` calls `array_last()` on PHP < 8.5.
 
 ## Domain Exceptions

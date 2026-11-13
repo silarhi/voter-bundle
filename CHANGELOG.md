@@ -14,5 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `resolveContext()` and `#[ProvidesArgument]`: abstract voters deny before any rule, or hand the methods values by type. The methods also take the token, the `$attribute` and the `?Vote`.
 - `RegisterRulesPass` compiles the rules into the container, and fails the build on a rule the voter cannot honor. In debug, editing a voter rebuilds the container.
 - A PHPStan extension (`extension.neon`) keeps the private `#[Grants]` methods from being reported as unused.
+- A usage provider for shipmonk/dead-code-detector (`shipmonk.neon`) keeps the `#[Grants]` methods from being reported as dead.
+- A Rector set, `VoterSetList::DEAD_CODE`, keeps the dead-code set from deleting the `#[Grants]` methods or dropping their parameters: it swaps `RemoveUnusedPrivateMethodRector` and `RemoveUnusedPrivateMethodParameterRector` for Grants-aware versions.
 
 [0.1.0]: https://github.com/silarhi/voter-bundle/commits/main

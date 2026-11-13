@@ -25,6 +25,8 @@ $finder = PhpCsFixer\Finder::create()
     ->notPath([
         'node_modules',
         'var',
+        // written by the FrameworkBundle of the test kernel
+        'config/reference.php',
     ])
 ;
 

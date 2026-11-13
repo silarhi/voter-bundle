@@ -1,0 +1,8 @@
+# For applications using shipmonk/dead-code-detector: include it next to the detector, e.g.
+#     includes:
+#         - vendor/silarhi/voter-bundle/shipmonk.neon
+services:
+    -
+        class: Silarhi\VoterBundle\PHPStan\GrantsMemberUsageProvider
+        tags:
+            - shipmonk.deadCode.memberUsageProvider

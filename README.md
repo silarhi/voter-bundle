@@ -32,11 +32,12 @@
 - **One place per rule**: no `supports()`, no `match ($attribute)`, no list of attributes and subjects to keep in sync
 - **Subjects per attribute**: the type of `$subject` tells what each attribute votes on; any other subject abstains,
   instead of reaching a method that cannot take it
+- **Static analysis and refactoring aware**: PHPStan, shipmonk/dead-code-detector and Rector's dead-code set keep the
+  `#[Grants]` methods, which only the voter calls
 - **Context layers**: abstract voters deny before any rule, or hand the methods what they need (the logged-in user,
   the active profile…) by type
 - **Compiled**: the container reads the attributes once, and fails to build on a rule it cannot honor, with a message
   that says what to change
-- **PHPStan aware**: an extension keeps the private `#[Grants]` methods from being reported as unused
 
 ## Requirements
 
@@ -183,19 +184,31 @@ voter that grants nothing.
 - **PHPStan**: with [phpstan/extension-installer](https://github.com/phpstan/extension-installer), the bundle's
   extension keeps the private `#[Grants]` methods from being reported as unused. Otherwise, include
   `vendor/silarhi/voter-bundle/extension.neon`.
+- **[shipmonk/dead-code-detector](https://github.com/shipmonk-rnd/dead-code-detector)**: it reports the `#[Grants]`
+  methods as dead too, private and protected ones alike. Include the bundle's usage provider (not automatic: it needs
+  the detector installed):
+
+    ```neon
+    # phpstan.neon
+    includes:
+        - vendor/silarhi/voter-bundle/shipmonk.neon
+    ```
+
 - **Rector**: the dead-code set cannot see that the voter calls its `#[Grants]` methods. It would delete them, and drop
-  a `$subject` parameter the method does not read, which changes its subjects. Skip both rules for your voters:
+  a `$subject` parameter the method does not read, which changes its subjects. Add the bundle's set next to it:
 
     ```php
-    use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodParameterRector;
-    use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodRector;
+    use Silarhi\VoterBundle\Rector\Set\VoterSetList;
 
     return RectorConfig::configure()
-        ->withSkip([
-            RemoveUnusedPrivateMethodRector::class => [__DIR__ . '/src/Security/Voter'],
-            RemoveUnusedPrivateMethodParameterRector::class => [__DIR__ . '/src/Security/Voter'],
-        ]);
+        ->withPreparedSets(deadCode: true)
+        ->withSets([VoterSetList::DEAD_CODE]);
     ```
+
+    It swaps `RemoveUnusedPrivateMethodRector` and `RemoveUnusedPrivateMethodParameterRector` for Grants-aware versions,
+    which run the original rules everywhere but on the `#[Grants]` methods: an unused private helper is still removed,
+    a helper a `#[Grants]` method calls is kept. Do not register the Grants-aware rules without the set: it also skips
+    the originals, which would run on their own otherwise.
 
 ## Performance
 

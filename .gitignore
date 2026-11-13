@@ -7,3 +7,5 @@
 .php-cs-fixer.cache
 .twig-cs-fixer.cache
 /var/
+# written by the FrameworkBundle of the test kernel
+/config/reference.php

@@ -13,12 +13,13 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassMethod\RemoveEmptyClassMethodRector;
-use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPrivateMethodRector;
 use Rector\Renaming\Rector\Name\RenameClassRector;
+use Silarhi\VoterBundle\Rector\Set\VoterSetList;
 
 return RectorConfig::configure()
     ->withCache(__DIR__ . '/var/tools/rector')
     ->withPaths([
+        'config/rector',
         'src',
         'tests',
     ])
@@ -29,9 +30,6 @@ return RectorConfig::configure()
         __DIR__ . '/tests/PHPStan/Data',
         // the voters RuleLoaderTest builds are invalid on purpose: no return type, unused parameters…
         __DIR__ . '/tests/Rule/RuleLoaderTest.php',
-        // Rector cannot see that the voter calls its #[Grants] methods: it would delete them (the README asks
-        // applications for this skip, and for RemoveUnusedPrivateMethodParameterRector's)
-        RemoveUnusedPrivateMethodRector::class => [__DIR__ . '/tests/Fixtures/Voter'],
         // Symfony 7.4 still declares eraseCredentials() on UserInterface
         RemoveEmptyClassMethodRector::class => [__DIR__ . '/tests/Fixtures/Model/User.php'],
     ])
@@ -39,6 +37,8 @@ return RectorConfig::configure()
     ->withComposerBased(
         symfony: true,
     )
+    // the dead-code set would delete the #[Grants] methods of the fixtures: the bundle's own set keeps them
+    ->withSets([VoterSetList::DEAD_CODE])
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,

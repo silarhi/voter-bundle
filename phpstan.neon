@@ -1,10 +1,12 @@
 includes:
-    # the extension of the bundle itself: phpstan/extension-installer only registers those of the dependencies
+    # the extensions of the bundle itself: phpstan/extension-installer only registers those of the dependencies
     - extension.neon
+    - shipmonk.neon
 
 parameters:
     level: max
     paths:
+        - config/rector
         - src
         - tests
     tmpDir: var/tools/phpstan
@@ -25,4 +27,15 @@ parameters:
         -
             identifier: phpstanApi.classConstant
             path: tests/PHPStan/GrantsMethodExtensionTest.php
+            count: 1
+        # Rector's container builds the rules
+        -
+            identifier: shipmonk.deadMethod
+            message: '#^Unused Silarhi\\VoterBundle\\Rector\\GrantsAware\w+::__construct$#'
+            path: src/Rector
+            count: 2
+        # Symfony 7.4 still declares it on UserInterface
+        -
+            identifier: shipmonk.deadMethod
+            path: tests/Fixtures/Model/User.php
             count: 1

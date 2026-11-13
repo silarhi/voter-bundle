@@ -38,12 +38,15 @@
         "phpstan/phpstan-symfony": "^2.1.1",
         "phpunit/phpunit": "^11.5.57 || ^12.5.38 || ^13.4.1",
         "rector/rector": "^2.8.1",
+        "shipmonk/dead-code-detector": "^1.4",
         "symfony/framework-bundle": "^7.4 || ^8.0",
         "symfony/polyfill-php85": "^1.43",
         "symfony/security-bundle": "^7.4 || ^8.0"
     },
     "suggest": {
-        "phpstan/extension-installer": "Registers the PHPStan extension that keeps the #[Grants] methods from being reported as unused"
+        "phpstan/extension-installer": "Registers the PHPStan extension that keeps the #[Grants] methods from being reported as unused",
+        "rector/rector": "Runs the dead-code set without deleting the #[Grants] methods: add VoterSetList::DEAD_CODE to the sets",
+        "shipmonk/dead-code-detector": "Keep the #[Grants] methods from being reported as dead: include vendor/silarhi/voter-bundle/shipmonk.neon"
     },
     "autoload": {
         "psr-4": {

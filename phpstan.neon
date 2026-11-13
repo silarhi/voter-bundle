@@ -34,7 +34,7 @@ parameters:
             message: '#^Unused Silarhi\\VoterBundle\\Rector\\GrantsAware\w+::__construct$#'
             path: src/Rector
             count: 2
-        # Symfony 8 no longer declares it on UserInterface; 7.4 still does, so it is not reported there
+        # Symfony 8 no longer declares it on UserInterface; 6.4 and 7.x still do, so it is not reported there
         -
             identifier: shipmonk.deadMethod
             path: tests/Fixtures/Model/User.php

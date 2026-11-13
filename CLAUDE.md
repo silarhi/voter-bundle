@@ -11,7 +11,7 @@ container compiles the rules when it builds.
 ## Tech Stack
 
 - **Language**: PHP 8.2+
-- **Framework**: Symfony 7.4 / 8.x (`symfony/security-core`, `symfony/dependency-injection`, `symfony/http-kernel`)
+- **Framework**: Symfony 6.4 / 7.x / 8.x (`symfony/security-core`, `symfony/dependency-injection`, `symfony/http-kernel`)
 - **Dev**: `symfony/framework-bundle` + `symfony/security-bundle` (functional test), PHPStan (also for the extension)
 
 ## Repository Structure
@@ -85,6 +85,9 @@ composer validate --strict && composer normalize --dry-run
   Rector rule constructors (built by Rector's container) and the `eraseCredentials()` of the user fixture.
 - `config/reference.php` is written by the FrameworkBundle of the test kernel (Symfony 7.4+): it is gitignored and
   out of PHP CS Fixer, PHPStan and Rector, which only read `config/rector`.
+- **`Vote` came with Symfony 7.3.** `voteOnAttribute()` declares `?Vote $vote = null` (required by 8.x, accepted as
+  an extra optional parameter by 6.4); the loader only compares `Vote::class`, so a `?Vote` parameter loads on 6.4 and
+  always gets `null` there. `AbstractRuleVoterTest` skips its reasons test without the class.
 - `symfony/polyfill-php85` is a dev dependency: PHPStan's `RuleTestCase` calls `array_last()` on PHP < 8.5.
 
 ## Domain Exceptions
@@ -102,7 +105,7 @@ Both implement `ExceptionInterface`.
 - PHP-CS-Fixer (`@Symfony`, `@Symfony:risky`, header), PHPStan level max, Rector (PHP 8.2 set, deadCode, codeQuality,
   typeDeclarations)
 - Keep PHP 8.2 syntax: no `new Foo()->bar()` without parentheses, no typed class constants
-- `symfony/*` keep wide ranges (`^7.4 || ^8.0`): never raise their floors; QA tools are bumped with `composer bump:tools`
+- `symfony/*` keep wide ranges (`^6.4 || ^7.0 || ^8.0`): never raise their floors; QA tools are bumped with `composer bump:tools`
 
 ## Documentation
 

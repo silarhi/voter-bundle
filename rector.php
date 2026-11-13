@@ -24,13 +24,13 @@ return RectorConfig::configure()
         'tests',
     ])
     ->withSkip([
-        // Symfony 8.1 moves the bundle classes to DependencyInjection\Kernel: the bundle still supports 7.4
+        // Symfony 8.1 moves the bundle classes to DependencyInjection\Kernel: the bundle still supports 6.4 and 7.x
         RenameClassRector::class,
         // read through reflection by the rule tests, not code to modernize
         __DIR__ . '/tests/PHPStan/Data',
         // the voters RuleLoaderTest builds are invalid on purpose: no return type, unused parameters…
         __DIR__ . '/tests/Rule/RuleLoaderTest.php',
-        // Symfony 7.4 still declares eraseCredentials() on UserInterface
+        // Symfony 6.4 and 7.x still declare eraseCredentials() on UserInterface
         RemoveEmptyClassMethodRector::class => [__DIR__ . '/tests/Fixtures/Model/User.php'],
     ])
     ->withPhpSets(php82: true)

@@ -1,0 +1,83 @@
+{
+    "name": "silarhi/voter-bundle",
+    "description": "Declare Symfony voter rules with a #[Grants] attribute on the method that decides them: the subject comes from the parameter type, the rules are compiled with the container.",
+    "license": "MIT",
+    "type": "symfony-bundle",
+    "keywords": [
+        "symfony",
+        "symfony-bundle",
+        "security",
+        "voter",
+        "authorization",
+        "attribute"
+    ],
+    "authors": [
+        {
+            "name": "Guillaume Sainthillier",
+            "email": "guillaume@silarhi.fr"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/silarhi/voter-bundle/issues",
+        "source": "https://github.com/silarhi/voter-bundle"
+    },
+    "require": {
+        "php": ">=8.2",
+        "symfony/config": "^7.4 || ^8.0",
+        "symfony/dependency-injection": "^7.4 || ^8.0",
+        "symfony/http-kernel": "^7.4 || ^8.0",
+        "symfony/security-core": "^7.4 || ^8.0"
+    },
+    "require-dev": {
+        "ergebnis/composer-normalize": "^2.54.0",
+        "friendsofphp/php-cs-fixer": "^3.95.27",
+        "phpstan/extension-installer": "^1.4.3",
+        "phpstan/phpstan": "^2.3.2",
+        "phpstan/phpstan-phpunit": "^2.0.8",
+        "phpstan/phpstan-strict-rules": "^2.1.0",
+        "phpstan/phpstan-symfony": "^2.1.1",
+        "phpunit/phpunit": "^11.5.57 || ^12.5.38 || ^13.4.1",
+        "rector/rector": "^2.8.1",
+        "symfony/framework-bundle": "^7.4 || ^8.0",
+        "symfony/polyfill-php85": "^1.43",
+        "symfony/security-bundle": "^7.4 || ^8.0"
+    },
+    "suggest": {
+        "phpstan/extension-installer": "Registers the PHPStan extension that keeps the #[Grants] methods from being reported as unused"
+    },
+    "autoload": {
+        "psr-4": {
+            "Silarhi\\VoterBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Silarhi\\VoterBundle\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true,
+            "phpstan/extension-installer": true
+        },
+        "audit": {
+            "block-insecure": false
+        },
+        "preferred-install": {
+            "*": "dist"
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "phpstan": {
+            "includes": [
+                "extension.neon"
+            ]
+        }
+    },
+    "scripts": {
+        "bump:tools": "@composer bump ergebnis/composer-normalize friendsofphp/php-cs-fixer phpstan/* phpunit/phpunit rector/rector",
+        "test": "phpunit",
+        "test:coverage": "phpunit"
+    }
+}

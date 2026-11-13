@@ -1,0 +1,99 @@
+# CLAUDE.md
+
+This file provides guidance for Claude Code when working on the Voter Bundle project.
+
+## Project Overview
+
+Voter Bundle replaces the `supports()` / `voteOnAttribute()` pair of Symfony voters with a `#[Grants]` attribute on
+the method that decides each security attribute. The subject comes from the type of the `$subject` parameter, and the
+container compiles the rules when it builds.
+
+## Tech Stack
+
+- **Language**: PHP 8.2+
+- **Framework**: Symfony 7.4 / 8.x (`symfony/security-core`, `symfony/dependency-injection`, `symfony/http-kernel`)
+- **Dev**: `symfony/framework-bundle` + `symfony/security-bundle` (functional test), PHPStan (also for the extension)
+
+## Repository Structure
+
+```
+src/
+├── Attribute/           # Grants (method or class, repeatable), ProvidesArgument (class, repeatable)
+├── DependencyInjection/ # RegisterRulesPass: compiles the rules of the security.voter services into setRules() calls
+├── Exception/           # ExceptionInterface, InvalidRuleException (build), MissingArgumentException (runtime)
+├── PHPStan/             # GrantsMethodExtension: #[Grants] methods are always used (extension.neon)
+├── Rule/                # Rule (plain data, dumpable), RuleLoader (reflection + validation)
+├── Voter/               # AbstractRuleVoter: supports*() from the rules, resolveContext(), calls the methods
+└── VoterBundle.php      # Registers RegisterRulesPass
+extension.neon           # The PHPStan extension, included by phpstan/extension-installer
+tests/                   # PHPUnit tests mirroring src/, Functional/ (TestKernel), Fixtures/ (models, voters),
+                         #   PHPStan/Data/ (sources analysed by GrantsMethodExtensionTest, excluded from PHPStan)
+```
+
+## Build & Test Commands
+
+```bash
+composer install
+vendor/bin/phpunit
+vendor/bin/phpstan analyse                     # level max
+vendor/bin/php-cs-fixer fix --dry-run --diff
+vendor/bin/rector process --dry-run
+composer validate --strict && composer normalize --dry-run
+```
+
+## CI/CD
+
+- Uses **Laminas CI Matrix Action** (`.github/workflows/continuous-integration.yml`), `pcov` for coverage
+- Additional check (`.laminas-ci.json`): `composer validate --strict && composer normalize --dry-run --diff`
+- The `main` ruleset requires the `CI passed` job; coverage is published to the `badges` branch
+- pnpm only runs the git hooks (husky + lint-staged); its version is pinned by `packageManager` in `package.json`
+
+## Architecture Notes
+
+- **Rules are plain arrays in the container.** `RuleLoader::load()` returns `array<attribute, RuleShape>`;
+  `RegisterRulesPass` adds a `setRules()` call per voter, so the dumped container holds array literals. A voter built
+  without the container falls back to `RuleLoader` once per class (`AbstractRuleVoter::$loadedRules`).
+- **Arguments are markers or classes.** `Rule::$arguments` lists `$subject`, `$attribute`, `$token`, `$vote` or the
+  provided class to read from the context; `RuleLoader` resolves a parameter typed with a parent class or an interface
+  to the one provided class matching it, so the runtime lookup is an exact key.
+- **The subject is matched by name** (`$subject`), never by type: a voter on `User` subjects still asks for the
+  logged-in `User`. No `$subject` parameter means a null subject only.
+- **Subjects per attribute.** `supportsAttribute()` and `supportsType()` answer the unions for the access decision
+  manager's cache; `supports()` checks the pair, so an attribute abstains on a subject its method cannot take.
+- **Private methods are called through `ReflectionMethod::invokeArgs()`**, from the class declaring them
+  (`Rule::$class`): a rule of an abstract parent must be `protected` (`getMethods()` skips the private methods of
+  parents).
+- **Resource tracking.** `ReflectionClassResource` only hashes public and protected methods: the pass adds a
+  `FileResource` for the voter and each parent below `AbstractRuleVoter`, so editing a private `#[Grants]` method
+  rebuilds the debug container.
+- **Rector's dead-code set deletes `#[Grants]` methods** and drops unused `$subject` parameters: `rector.php` skips
+  `RemoveUnusedPrivateMethodRector` for the fixtures, and the README asks applications for the same skips.
+- `symfony/polyfill-php85` is a dev dependency: PHPStan's `RuleTestCase` calls `array_last()` on PHP < 8.5.
+
+## Domain Exceptions
+
+| Exception                  | Thrown when                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------------ |
+| `InvalidRuleException`     | A `#[Grants]` or `#[ProvidesArgument]` cannot be honored (container build)           |
+| `MissingArgumentException` | `resolveContext()` returned no value for a class declared with `#[ProvidesArgument]` |
+
+Both implement `ExceptionInterface`.
+
+## Coding Conventions
+
+- `declare(strict_types=1)` everywhere, PSR-4 under `Silarhi\VoterBundle\`
+- PHP-CS-Fixer (`@Symfony`, `@Symfony:risky`, header), PHPStan level max, Rector (PHP 8.2 set, deadCode, codeQuality,
+  typeDeclarations)
+- Keep PHP 8.2 syntax: no `new Foo()->bar()` without parentheses, no typed class constants
+- `symfony/*` keep wide ranges (`^7.4 || ^8.0`): never raise their floors; QA tools are bumped with `composer bump:tools`
+
+## Documentation
+
+Update `README.md` (features, parameters, errors), this file (structure, architecture notes, exceptions) and
+`CHANGELOG.md` with every public API change. Changelog entries go in the top section titled with the next release
+(`[0.2.0] - Unreleased`), never a bare `[Unreleased]`.
+
+## Releases
+
+Lightweight tag `vX.Y.Z` on `origin/main` once CI is green, with a GitHub release whose notes follow the `CHANGELOG.md`
+entry. Packagist updates from the GitHub hook.

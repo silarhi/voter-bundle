@@ -1,0 +1,5 @@
+services:
+    -
+        class: Silarhi\VoterBundle\PHPStan\GrantsMethodExtension
+        tags:
+            - phpstan.methods.alwaysUsedMethodExtension

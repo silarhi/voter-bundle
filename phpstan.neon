@@ -1,0 +1,28 @@
+includes:
+    # the extension of the bundle itself: phpstan/extension-installer only registers those of the dependencies
+    - extension.neon
+
+parameters:
+    level: max
+    paths:
+        - src
+        - tests
+    tmpDir: var/tools/phpstan
+    excludePaths:
+        # read by GrantsMethodExtensionTest, which expects one of them to be reported
+        - tests/PHPStan/Data/*
+    ignoreErrors:
+        # the voters RuleLoaderTest builds are invalid on purpose: the loader must refuse them
+        -
+            identifiers:
+                - argument.type
+                - class.notFound
+                - missingType.parameter
+                - missingType.return
+                - return.unusedType
+            path: tests/Rule/RuleLoaderTest.php
+        # the rule the extension feeds is internal to PHPStan: a minor version may change it, the test would tell
+        -
+            identifier: phpstanApi.classConstant
+            path: tests/PHPStan/GrantsMethodExtensionTest.php
+            count: 1

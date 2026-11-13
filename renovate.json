@@ -1,0 +1,68 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended"
+    ],
+    "platformAutomerge": true,
+    "automergeType": "pr",
+    "minimumReleaseAge": "3 days",
+    "packageRules": [
+        {
+            "matchUpdateTypes": [
+                "minor",
+                "patch",
+                "digest"
+            ],
+            "automerge": true
+        },
+        {
+            "matchUpdateTypes": [
+                "major"
+            ],
+            "automerge": false
+        },
+        {
+            "matchManagers": [
+                "composer"
+            ],
+            "matchDepTypes": [
+                "require-dev"
+            ],
+            "rangeStrategy": "bump"
+        },
+        {
+            "description": "The bundles of the functional tests are tested against their minimal versions: never raise the lower bound, only widen for new majors",
+            "matchManagers": [
+                "composer"
+            ],
+            "matchPackageNames": [
+                "symfony/framework-bundle",
+                "symfony/security-bundle"
+            ],
+            "rangeStrategy": "widen"
+        },
+        {
+            "description": "Symfony runtime requirements keep their minimal versions: never raise the lower bound, only widen for new majors",
+            "matchManagers": [
+                "composer"
+            ],
+            "matchDepTypes": [
+                "require"
+            ],
+            "matchPackageNames": [
+                "symfony/**"
+            ],
+            "rangeStrategy": "widen"
+        },
+        {
+            "description": "The PHP floor is a support decision, not a dependency update",
+            "matchManagers": [
+                "composer"
+            ],
+            "matchDepNames": [
+                "php"
+            ],
+            "enabled": false
+        }
+    ]
+}

@@ -71,6 +71,10 @@ final class AbstractRuleVoterTest extends TestCase
 
     public function testPassesTheAttributeAndTheVote(): void
     {
+        if (!class_exists(Vote::class)) {
+            self::markTestSkipped('Symfony 7.3 added the Vote object.');
+        }
+
         $vote = new Vote();
 
         self::assertSame(VoterInterface::ACCESS_GRANTED, (new PostVoter())->vote(self::token('alice'), new Comment(), [PostVoter::REPORT], $vote));

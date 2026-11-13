@@ -33,7 +33,7 @@ final readonly class User implements UserInterface
     }
 
     /**
-     * Symfony 7.4 still declares it; 8.0 removed it.
+     * Symfony 6.4 and 7.x still declare it; 8.0 removed it.
      */
     public function eraseCredentials(): void
     {

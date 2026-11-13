@@ -42,7 +42,7 @@
 ## Requirements
 
 - PHP 8.2+
-- Symfony 7.4 or 8.x (`symfony/security-core`)
+- Symfony 6.4, 7.x or 8.x (`symfony/security-core`)
 
 ## Installation
 
@@ -105,13 +105,13 @@ as the context of the voter resolves (see below).
 
 The method returns `bool`: `true` grants, `false` denies. Its parameters, in any order, are:
 
-| Parameter                   | Gets                                                        |
-| --------------------------- | ----------------------------------------------------------- |
-| named `$subject`            | the subject; its type tells which subjects the method takes |
-| named `$attribute`          | the security attribute (`string`)                           |
-| typed `TokenInterface`      | the token                                                   |
-| typed `?Vote`               | the vote, to `addReason()`                                  |
-| typed with a provided class | the value `resolveContext()` returns for it                 |
+| Parameter                   | Gets                                                          |
+| --------------------------- | ------------------------------------------------------------- |
+| named `$subject`            | the subject; its type tells which subjects the method takes   |
+| named `$attribute`          | the security attribute (`string`)                             |
+| typed `TokenInterface`      | the token                                                     |
+| typed `?Vote`               | the vote, to `addReason()` (always `null` before Symfony 7.3) |
+| typed with a provided class | the value `resolveContext()` returns for it                   |
 
 The subject is matched by name, not by type, so a voter on `User` subjects can still ask for the logged-in `User`.
 

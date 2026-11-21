@@ -40,7 +40,7 @@
         "rector/rector": "^2.8.5",
         "shipmonk/dead-code-detector": "^1.4.2",
         "symfony/framework-bundle": "^6.4 || ^7.0 || ^8.0",
-        "symfony/polyfill-php85": "^1.43",
+        "symfony/polyfill-php85": "^1.44.0",
         "symfony/security-bundle": "^6.4 || ^7.0 || ^8.0"
     },
     "suggest": {

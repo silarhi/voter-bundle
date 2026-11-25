@@ -31,7 +31,7 @@ return RectorConfig::configure()
         __DIR__ . '/tests/Rule/RuleLoaderTest.php',
     ])
     ->reportUnusedSkips()
-    ->withPhpSets(php82: true)
+    ->withPhpSets()
     ->withComposerBased()
     // the dead-code set would delete the #[Grants] methods of the fixtures: the bundle's own set keeps them
     ->withSets([VoterSetList::DEAD_CODE])

@@ -11,8 +11,10 @@ container compiles the rules when it builds.
 ## Tech Stack
 
 - **Language**: PHP 8.2+
-- **Framework**: Symfony 6.4 / 7.x / 8.x (`symfony/security-core`, `symfony/dependency-injection`, `symfony/http-kernel`)
-- **Dev**: `symfony/framework-bundle` + `symfony/security-bundle` (functional test), PHPStan (also for the extension)
+- **Framework**: Symfony 6.4 / 7.x / 8.x; `symfony/security-core` is the only runtime dependency
+- **Dev**: `symfony/config`, `symfony/dependency-injection`, `symfony/http-kernel` (the bundle class and the pass: only
+  a kernel loads them, and a kernel has them), `symfony/framework-bundle` + `symfony/security-bundle` (functional test),
+  PHPStan (also for the extension)
 
 ## Repository Structure
 
@@ -49,7 +51,12 @@ composer validate --strict && composer normalize --dry-run
 ## CI/CD
 
 - Uses **Laminas CI Matrix Action** (`.github/workflows/continuous-integration.yml`), `pcov` for coverage
-- Additional check (`.laminas-ci.json`): `composer validate --strict && composer normalize --dry-run --diff`
+- Additional checks (`.laminas-ci.json`): `composer validate --strict && composer normalize --dry-run --diff`, and
+  "PHPUnit without the bundle dependencies": it removes the framework, `symfony/config`, `symfony/dependency-injection`
+  and `symfony/http-kernel`, then runs the `unit` suite without the `bundle` group (`RegisterRulesPassTest`). The
+  `functional` suite (its `KernelTestCase` cannot even load without the framework) is left out. Keep `src/` outside
+  `VoterBundle.php` and `DependencyInjection/` free of those packages: applications without a kernel build the voters
+  by hand
 - The `main` ruleset requires the `CI passed` job; coverage is published to the `badges` branch
 - pnpm only runs the git hooks (husky + lint-staged); its version is pinned by `packageManager` in `package.json`
 
@@ -92,10 +99,10 @@ composer validate --strict && composer normalize --dry-run
 
 ## Domain Exceptions
 
-| Exception                  | Thrown when                                                                          |
-| -------------------------- | ------------------------------------------------------------------------------------ |
-| `InvalidRuleException`     | A `#[Grants]` or `#[ProvidesArgument]` cannot be honored (container build)           |
-| `MissingArgumentException` | `resolveContext()` returned no value for a class declared with `#[ProvidesArgument]` |
+| Exception                  | Thrown when                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `InvalidRuleException`     | A `#[Grants]` or `#[ProvidesArgument]` cannot be honored (container build, or first vote without it) |
+| `MissingArgumentException` | `resolveContext()` returned no value for a class declared with `#[ProvidesArgument]`                 |
 
 Both implement `ExceptionInterface`.
 

@@ -5,6 +5,15 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - Unreleased
+
+### Changed
+
+- `symfony/config`, `symfony/dependency-injection` and `symfony/http-kernel` are no longer required: only the bundle
+  class and `RegisterRulesPass` use them, and a kernel always has them (`conflict` keeps them at 6.4+). An application
+  without a kernel requires `symfony/security-core` alone, and builds the voters by hand: they read their rules by
+  reflection on their first vote, once per class.
+
 ## [0.1.0] - 2026-11-13
 
 ### Added
@@ -18,4 +27,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - A usage provider for shipmonk/dead-code-detector (`shipmonk.neon`) keeps the `#[Grants]` methods from being reported as dead.
 - A Rector set, `VoterSetList::DEAD_CODE`, keeps the dead-code set from deleting the `#[Grants]` methods or dropping their parameters: it swaps `RemoveUnusedPrivateMethodRector` and `RemoveUnusedPrivateMethodParameterRector` for Grants-aware versions.
 
+[0.2.0]: https://github.com/silarhi/voter-bundle/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/silarhi/voter-bundle/releases/tag/v0.1.0

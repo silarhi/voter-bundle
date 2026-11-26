@@ -1,6 +1,6 @@
 {
     "name": "silarhi/voter-bundle",
-    "description": "Declare Symfony voter rules with a #[Grants] attribute on the method that decides them: the subject comes from the parameter type, the rules are compiled with the container.",
+    "description": "Declare Symfony voter rules with a #[Grants] attribute on the method that decides them: the subject comes from the parameter type, the rules are compiled with the container or read by reflection without one.",
     "license": "MIT",
     "type": "symfony-bundle",
     "keywords": [
@@ -23,9 +23,6 @@
     },
     "require": {
         "php": ">=8.2",
-        "symfony/config": "^6.4 || ^7.0 || ^8.0",
-        "symfony/dependency-injection": "^6.4 || ^7.0 || ^8.0",
-        "symfony/http-kernel": "^6.4 || ^7.0 || ^8.0",
         "symfony/security-core": "^6.4 || ^7.0 || ^8.0"
     },
     "require-dev": {
@@ -39,14 +36,25 @@
         "phpunit/phpunit": "^11.5.57 || ^12.5.38 || ^13.4.1",
         "rector/rector": "^2.9.2",
         "shipmonk/dead-code-detector": "^1.4.2",
+        "symfony/config": "^6.4 || ^7.0 || ^8.0",
+        "symfony/dependency-injection": "^6.4 || ^7.0 || ^8.0",
+        "symfony/error-handler": "^6.4 || ^7.0 || ^8.0",
+        "symfony/filesystem": "^6.4 || ^7.0 || ^8.0",
         "symfony/framework-bundle": "^6.4 || ^7.0 || ^8.0",
+        "symfony/http-kernel": "^6.4 || ^7.0 || ^8.0",
         "symfony/polyfill-php85": "^1.44.0",
         "symfony/security-bundle": "^6.4 || ^7.0 || ^8.0"
+    },
+    "conflict": {
+        "symfony/config": "<6.4",
+        "symfony/dependency-injection": "<6.4",
+        "symfony/http-kernel": "<6.4"
     },
     "suggest": {
         "phpstan/extension-installer": "Registers the PHPStan extension that keeps the #[Grants] methods from being reported as unused",
         "rector/rector": "Runs the dead-code set without deleting the #[Grants] methods: add VoterSetList::DEAD_CODE to the sets",
-        "shipmonk/dead-code-detector": "Keep the #[Grants] methods from being reported as dead: include vendor/silarhi/voter-bundle/shipmonk.neon"
+        "shipmonk/dead-code-detector": "Keep the #[Grants] methods from being reported as dead: include vendor/silarhi/voter-bundle/shipmonk.neon",
+        "symfony/framework-bundle": "Register Silarhi\\VoterBundle\\VoterBundle to compile the rules with the container (optional: without it, a voter reads its rules by reflection once per class, and needs neither symfony/dependency-injection nor symfony/http-kernel)"
     },
     "autoload": {
         "psr-4": {

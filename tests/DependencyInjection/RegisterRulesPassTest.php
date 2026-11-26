@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Silarhi\VoterBundle\Tests\DependencyInjection;
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 use Silarhi\VoterBundle\DependencyInjection\RegisterRulesPass;
@@ -28,6 +29,11 @@ use Symfony\Component\Config\Resource\FileResource;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Security\Core\Authorization\Voter\RoleVoter;
 
+/**
+ * Needs symfony/config and symfony/dependency-injection: the "PHPUnit without the bundle dependencies" CI job removes
+ * both and excludes this group.
+ */
+#[Group('bundle')]
 final class RegisterRulesPassTest extends TestCase
 {
     public function testCompilesTheRulesOfTheVoters(): void

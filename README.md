@@ -42,7 +42,8 @@
 ## Requirements
 
 - PHP 8.2+
-- Symfony 6.4, 7.x or 8.x (`symfony/security-core`)
+- Symfony 6.4, 7.x or 8.x (`symfony/security-core`): the bundle class is optional, see
+  [Without the bundle](#without-the-bundle)
 
 ## Installation
 
@@ -59,6 +60,24 @@ return [
     Silarhi\VoterBundle\VoterBundle::class => ['all' => true],
 ];
 ```
+
+### Without the bundle
+
+The voters only need `symfony/security-core`: an application without the framework, `symfony/dependency-injection` or
+`symfony/http-kernel` builds them by hand, and hands them to an access decision manager.
+
+```php
+use Symfony\Component\Security\Core\Authorization\AccessDecisionManager;
+use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
+
+$accessDecisionManager = new AccessDecisionManager([new PostVoter(), new ProfileVoter()]);
+$authorizationChecker = new AuthorizationChecker($tokenStorage, $accessDecisionManager);
+
+$authorizationChecker->isGranted(PostVoter::SHOW, $post);
+```
+
+A voter then reads its rules by reflection on its first vote, once per class: a rule it cannot honor throws the same
+`InvalidRuleException` there instead of failing the container build.
 
 ## Quick start
 
@@ -173,7 +192,7 @@ is `protected`.
 
 ## Errors at build time
 
-The container refuses, with a message naming the method and what to change: a method that is static or does not return
+The container refuses (or the first vote, [without the bundle](#without-the-bundle)), with a message naming the method and what to change: a method that is static or does not return
 `bool`; a parameter it cannot fill (a scalar other than `$attribute`, a token implementation instead of
 `TokenInterface`, a non-nullable `Vote`, a class no layer provides, an ambiguous one); a `$subject` typed with an
 intersection, `iterable` or an unknown class; an attribute granted twice; a class-level grant without `subjects`; a

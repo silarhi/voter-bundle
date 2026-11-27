@@ -51,6 +51,7 @@ composer validate --strict && composer normalize --dry-run
 ## CI/CD
 
 - Uses **Laminas CI Matrix Action** (`.github/workflows/continuous-integration.yml`), `pcov` for coverage
+- PHPStan runs in the matrix (lowest PHP, latest dependencies) and on the latest PHP ("PHPStan on the latest PHP" in `.laminas-ci.json`): ignore an error inline with `@phpstan-ignore`, or in `phpstan.neon` with `reportUnmatched: false` when only one of the two setups reports it
 - Additional checks (`.laminas-ci.json`): `composer validate --strict && composer normalize --dry-run --diff`, and
   "PHPUnit without the bundle dependencies": it removes the framework, `symfony/config`, `symfony/dependency-injection`
   and `symfony/http-kernel`, then runs the `unit` suite without the `bundle` group (`RegisterRulesPassTest`). The
